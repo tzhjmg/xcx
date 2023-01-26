@@ -1,0 +1,480 @@
+-- MySQL Administrator dump 1.4
+--
+-- ------------------------------------------------------
+-- Server version	5.7.25-log
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+--
+-- Create schema learningAiExam_db
+--
+
+CREATE DATABASE IF NOT EXISTS learningAiExam_db;
+USE learningAiExam_db;
+-- 生成表结构：1 用户表(la_users)
+DROP TABLE IF EXISTS `la_users` ;
+CREATE TABLE `la_users` (
+  `userId` mediumint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `userName` VARCHAR(20) NOT NULL,
+  `userPassword` VARCHAR(20) NOT NULL,
+  `userTel` VARCHAR(11) NOT NULL,
+  `userEmail` VARCHAR(50) NOT NULL,
+  `userType` tinyint NOT NULL DEFAULT 0,
+  PRIMARY KEY (`userId`)
+)
+ENGINE = InnoDB;
+
+-- 生成表结构：2学生表(la_students)
+DROP TABLE IF EXISTS `la_students`;
+CREATE TABLE `la_students` (
+  `stuId` mediumint(8) unsigned NOT NULL,
+  `stuName` varchar(20)  NOT NULL DEFAULT '',
+  `grade` varchar(20)  NOT NULL DEFAULT '',
+  `major` varchar(50)  NOT NULL DEFAULT '',
+  `stuClass` varchar(20)  NOT NULL DEFAULT '',
+  `joinYear` varchar(4)  NOT NULL DEFAULT '',
+  `stuTel` varchar(20)  NOT NULL DEFAULT '',
+  `stuSchool` varchar(50)  NOT NULL DEFAULT '',
+  `stuHome` varchar(100)  NOT NULL DEFAULT '',
+  `stuMemo` varchar(500)  NOT NULL DEFAULT '',
+  `stuOrigin` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `dataStatus` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `dataRegdate` datetime NOT NULL DEFAULT '2022-06-23 00:00:00',
+  PRIMARY KEY (`stuId`),
+  UNIQUE KEY `stuTel` (`stuTel`)
+) ENGINE = InnoDB;
+
+--
+-- Dumping data for table `la_students` 
+--
+-- 生成表结构：3试卷表（la_paper）
+DROP TABLE IF EXISTS `la_paper`;
+CREATE TABLE `la_paper` (
+  `paperId` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `examCode` varchar(8)  NOT NULL,
+  `examName` varchar(200)  NOT NULL,
+  `examDate` datetime NOT NULL DEFAULT '2022-06-23 00:00:00',
+  `totalTime` int(4)  NOT NULL DEFAULT '0',
+  `joinYear` varchar(4)  NOT NULL DEFAULT '',
+  `grade` varchar(20)  NOT NULL DEFAULT '',
+  `term` varchar(20)  NOT NULL DEFAULT '',
+  `major` varchar(50)  NOT NULL DEFAULT '',
+  `subjectName` varchar(50)  NOT NULL DEFAULT '',
+  `score`  int(4)  NOT NULL DEFAULT '100',  
+  PRIMARY KEY (`paperId`)
+) ENGINE=InnoDB;
+
+-- 生成表结构：4试题表（la_paper_questions）
+DROP TABLE IF EXISTS `la_paper_questions`;
+CREATE TABLE `la_paper_questions` (
+  `paperId` mediumint(8) unsigned NOT NULL,
+  `questionID`  varchar(8) NOT NULL,
+  `questionType` int(4)  NOT NULL DEFAULT '1',  
+  `score`  int(4)  NOT NULL DEFAULT '5',  
+  PRIMARY KEY (`paperId`, `questionID` )
+) ENGINE=InnoDB;
+
+-- 生成表结构：5考试表（la_exam）
+DROP TABLE IF EXISTS `la_exam`;
+CREATE TABLE `la_exam` (
+  `examId` mediumint(8) unsigned NOT NULL,
+  `paperId` mediumint(8) unsigned NOT NULL,
+  `studentId` mediumint(8) unsigned NOT NULL,
+  `subjectName` varchar(20) NOT NULL DEFAULT '',
+  `score`  int(4)  NOT NULL DEFAULT 5, 
+  `infactScore`  int(4)  NOT NULL DEFAULT 5, 
+  PRIMARY KEY (`examId`)
+) ENGINE=InnoDB;
+
+-- 生成表结构：6 考试明细表(la_exam_detail）
+DROP TABLE IF EXISTS `la_exam_detail`;
+CREATE TABLE `la_exam_detail` (
+  `examId`  mediumint(8) unsigned NOT NULL,
+  `questionID`  varchar(8) NOT NULL,
+  `questionType`  int(4)  NOT NULL DEFAULT 1, 
+  `subjectName`  varchar(20)  NOT NULL DEFAULT '',
+  `userId`  mediumint(8) unsigned NOT NULL,
+  `questionContent`  varchar(500)  NOT NULL DEFAULT '',
+  `options`   varchar(200)   NOT NULL DEFAULT '',  
+  `answer`  varchar(200)  NOT NULL DEFAULT '',
+  `infactAnswer`  varchar(200)  NOT NULL DEFAULT '',
+  `score`  int(4)  NOT NULL DEFAULT 5  
+) ENGINE=InnoDB;
+
+-- 考试报告暂不实现，仅显示错误个数等基本信息即可
+-- 8、添加题库的试题
+DROP TABLE IF EXISTS `single_questions`;
+CREATE TABLE `single_questions` (
+  `ID`  mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `questionID`  varchar(8) NOT NULL,
+  `major` varchar(50)   NOT NULL DEFAULT '',
+  `grade` varchar(20)   NOT NULL DEFAULT '',
+  `subjectName`  varchar(20)  NOT NULL DEFAULT '',
+  `userId`  mediumint(8) unsigned NOT NULL,
+  `questionContent`  varchar(500)  NOT NULL DEFAULT '',
+  `optionA`   varchar(200)   NOT NULL DEFAULT '',
+  `optionB`   varchar(200)  NOT NULL DEFAULT '',
+  `optionC`  varchar(200)   NOT NULL DEFAULT '',
+  `optionD`  varchar(200)   NOT NULL DEFAULT '',
+  `answer`  varchar(200)  NOT NULL DEFAULT '',
+  `level` varchar(20)   NOT NULL DEFAULT '',
+  `testType` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `testFor`  varchar(200)  NOT NULL DEFAULT '',  
+  `dataStatus` tinyint(1) unsigned NOT NULL DEFAULT 1,
+  `dataRegdate` datetime NOT NULL DEFAULT '2022-06-23 00:00:00',
+  PRIMARY KEY (`ID`)
+) ENGINE = InnoDB;
+
+ALTER TABLE single_questions ADD CONSTRAINT UNIQUE(questionID);
+
+select q.* from `single_questions` q left join `la_students` s on q.`grade`=s.`grade` and s.stuTel='18502676989'
+
+/****   考试过程 >> ***/
+-- 将以下数据真实化，都采用真题填充
+/* 20220814-1SQL */
+delete from la_users;
+INSERT INTO `la_users` (`userName` ,`userPassword` ,`userTel` ,`userEmail` ,`userType`) VALUES 
+ (  'juzizhuang', '0516','18800050516', 'tzhjmg@163.com', 6),
+ (  'lichenyao', '2676','18502676989', 'tzhjmg@163.com', 6),
+ (  'xuezhenhao', '1023','18710235831', 'tzhjmg@163.com', 6),
+ (  'shiyujia', '8108','15810841499', 'tzhjmg@163.com', 6),
+ (  'shijinhe', '3668','13263136689', 'tzhjmg@163.com', 6),
+ (  'zhaozixi', '3112','13311203791', 'tzhjmg@163.com', 6),
+ (  'zoushuo', '1034','18810342719', 'tzhjmg@163.com', 6),
+ (  'zhaoyuexin', '1099','18310993129', 'tzhjmg@163.com', 6);
+
+--- -- 2022.10.03 非学习班学员
+INSERT INTO `la_users` (`userName` ,`userPassword` ,`userTel` ,`userEmail` ,`userType`) VALUES 
+ (  'liujiayin', '8114','15081149870', 'tzhjmg@163.com', 6),
+ (  'dengjiayi', '1088','18210888136', 'tzhjmg@163.com', 6),
+ (  'wuluoxiao', '9497','13521949796', 'tzhjmg@163.com', 6),
+ (  'gongwenbo', '7922','15922079222', 'tzhjmg@163.com', 6),
+ (  'wuhaoxuan', '1066','13810665155', 'tzhjmg@163.com', 6);
+--鞠子壮
+--李辰瑶
+--薛振浩
+--侍煜佳
+--史金贺
+--赵子熙
+--邹硕
+--赵悦心
+--- -- 2022.10.03 非学习班学员>>
+-- 刘佳音  2
+--邓家熠  4
+-- 吴骆骁  2
+-- 贡文博
+-- 吴皓轩 6
+-- userType:1-管理员，6-受邀用户，8-正式会员，9-vip用户
+/* 20220814-2SQL */
+delete from la_students;
+INSERT INTO `la_students` (`stuId` ,`stuName` ,`grade`  ,`major`  ,`stuClass`  ,`joinYear`,`stuTel`,`stuSchool` , `stuHome` ,`stuMemo` ,`stuOrigin` ,`dataStatus`  ,`dataRegdate`  ) VALUES 
+ (1, '鞠子壮', '7年级', '初中','2', '2022', '18800050516','武清区泗村店初级中学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-06-23 00:00:00'),
+ (2,'李辰瑶', '3年级', '小学','2', '2022', '18502676989','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-06-23 00:00:00'),
+ (3,'薛振浩', '3年级', '小学','2', '2022', '18710235831','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-06-23 00:00:00'),
+ (4, '侍煜佳', '3年级', '小学','2', '2022', '15810841499','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-06-23 00:00:00'),
+ (5, '史金贺', '4年级', '小学','2', '2022', '13263136689','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-06-23 00:00:00'),
+ (6, '赵子熙', '5年级', '小学','2', '2022', '13311203791','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-06-23 00:00:00'),
+ (7, '邹硕', '5年级', '小学','2', '2022', '18810342719','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-08-23 00:00:00'),
+ (8, '赵悦心', '2年级', '小学','2', '2022', '18310993129','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-08-23 00:00:00');
+
+--- -- 2022.10.03 非学习班学员>>
+INSERT INTO `la_students` (`stuId` ,`stuName` ,`grade`  ,`major`  ,`stuClass`  ,`joinYear`,`stuTel`,`stuSchool` , `stuHome` ,`stuMemo` ,`stuOrigin` ,`dataStatus`  ,`dataRegdate`  ) VALUES 
+(9, '刘佳音', '2年级', '小学','2', '2022', '15081149870','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-10-03 00:00:00'),
+(10, '邓家熠', '5年级', '小学','2', '2022', '18210888136','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-10-03 00:00:00'),
+(11, '吴骆骁', '2年级', '小学','2', '2022', '13521949796','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-10-03 00:00:00'),
+(12, '贡文博', '2年级', '小学','2', '2022', '15922079222','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-10-12 00:00:00'),
+(13, '吴皓轩', '6年级', '小学','2', '2022', '13810665155','武清区泗村店中心小学', '武清区恒大山水城西区恒泽园内', '', 6,1, '2022-10-12 00:00:00');
+
+select * from la_users where userTel = '18800050516' and userType=6
+select * from la_students where stuTel = '18800050516' 
+-- delete from `single_questions` 
+/*  2022-08-14 以下数据废弃，采用excel导入代替
+-- 1、提前生成单选题（手工操作数据库）-- 以下数据可用 2022.07.05 
+INSERT INTO `single_questions` (`questionID`  ,`grade`  ,`major`  ,`subjectName`  ,`userId`,`questionContent`,
+`optionA` , `optionB` ,`optionC`,`optionD`,`answer`,`level`,`testType`,`testFor`,`dataStatus` ,`dataRegdate`) VALUES 
+ ( '72000001', '6年级', '小学','数学', 0, '某水果店第一天用1000元钱购进一批西瓜,当天全部售出，盈利十分之一。第二天又以第一天销售额的 十分之九购进同样数量的一批西瓜,由于天气变化影响销售,于是将这批西瓜按第二天进价的十分之九全部售出。该水果店这两天卖西瓜的盈亏情况是多少',
+'盈利1元', '盈利10元', '亏损1元', '亏损99元', 'A', '较难', 1,'知识难点',0, '2022-06-23 00:00:00'),
+ ( '72000002','6年级', '小学','数学', 0, '一个圆锥的底面半径是一个圆柱底面半径的2倍,圆柱的体积是圆锥体积的25%,圆柱与圆锥的高的比是(  )',
+'1:3', '1:4', '3:1', '3:4', 'A', '中等', 1, '基础知识',0, '2022-06-23 00:00:00'),
+ ( '72000003','6年级', '小学','数学', 0, '圆柱的体积比与它等底等高的圆锥的体积大(  )',
+'1/3', '2/3', '2倍', '无法判断', 'C', '中等', 5, '基础与难点混合',0, '2022-06-23 00:00:00'),
+ ( '72000004','6年级', '小学','数学', 0, '某种面包买4送1,相当于现价是原价的百分之多少',
+'80', '120', '20', '不能确定', 'A', '简单', 1, '基础知识',0, '2022-06-23 00:00:00'),
+ ('72000005', '6年级', '小学','数学', 0, '一辆货车从某地开往武汉，在安全行驶速度内，如果把车速提高20%，那么可以提前1小时到达；如果按照原来的速度行驶140公里后，把车速提高25%，那么可以提前半个小时到达。原计划(  )小时可以到达武汉',
+'5', '6', '8', '不能确定', 'B', '较难', 4, '计算类',0, '2022-06-23 00:00:00'),
+ ('72000006', '6年级', '小学','数学', 0, '一辆客车2小时行180km,一辆货车3小时行180km，这辆货车与这辆客车的平均速度比是( )',
+'1:2', '2:3', '3:2', '1:3', 'B', '简单', 1, '知识点比例',0, '2022-06-23 00:00:00'),
+ ('72000007', '6年级', '小学','数学', 0, '有两根同样长度的木料，第一根用了3/5 m，第二根用了3/5。下列说法正确的是(   )',
+'第一根木料剩下的长', '第二根木料剩下的长', '两根木料剩下的一样长', '无法确定', 'D', '较难', 3, '思维技巧',0, '2022-06-23 00:00:00'),
+ ('72000008', '6年级', '小学','数学', 0, '在79个不同的自然数中,至少有(   )个数的奇偶性相同',
+'41', '40', '39', '38', 'B', '简单', 3, '思维逻辑', 0, '2022-06-23 00:00:00');
+
+-- level：1-非常简单,2-简单，3-中等，4-较难，5-特别难
+-- testType：1-基础知识，2-方法和技巧，3-思维逻辑，4，复杂计算，5-混合类
+*/
+         生成试卷、试题 （手工操作数据库）--  以下数据可用 2022.07.05
+INSERT INTO `la_paper` (`examCode` ,`examName` ,`examDate` ,`totalTime` ,`joinYear` ,`grade`  ,`term` ,`major` , `subjectName` ,`score` ) VALUES 
+ ( '0606', '期末考试', '2022-06-23 00:00:00', 90, '2022', '6年级','下学期', '小学', '数学', 100);
+-- 以下不处理
+INSERT INTO `la_paper_questions` (`paperId` ,`questionID` ,`questionType` ,`score` ) VALUES 
+( 1,  '72000001', 1, 5),
+( 1,  '72000002', 1, 5),
+( 1,  '72000003', 1, 5),
+( 1,  '72000004', 1, 5),
+( 1,  '72000005', 1, 5),
+( 1,  '72000006', 1, 5),
+( 1,  '72000007', 1, 5),
+( 1,  '72000008', 1, 5);
+-- questionType：1-单选，2-多选，3-判断，4-填空
+
+         提前生成考试表记录和考试明细表记录（手工操作，针对受邀用户）-- 以下数据可用 2022.07.05
+/* 20220814-3SQL */
+delete from `la_exam`;
+INSERT INTO `la_exam` (`examId` ,`paperId` ,`studentId` ,`subjectName`, `score`, `infactScore`  ) VALUES 
+ ( 1,1, 1,'数学' ,100, 0),
+ ( 2,1, 2,'数学' ,100, 0),
+ ( 3,1, 3,'数学' ,100, 0),
+ ( 4,1, 4,'数学' ,100, 0),
+ ( 5,1, 5,'数学' ,100, 0),
+ ( 6,1, 6,'数学' ,100, 0),
+ ( 7,1, 7,'数学' ,100, 0),
+ ( 8,1, 8,'数学' ,100, 0);
+
+INSERT INTO `la_exam` (`examId` ,`paperId` ,`studentId` ,`subjectName`, `score`, `infactScore`  ) VALUES 
+ ( 9,1, 9,'数学' ,100, 0),
+ ( 10,1, 10,'数学' ,100, 0),
+ ( 11,1, 11,'数学' ,100, 0),
+ ( 12,1, 12,'数学' ,100, 0),
+ ( 13,1, 13,'数学' ,100, 0);
+/* 20220814-4SQL */
+delete from `la_exam_detail`;
+-- 鞠子壮
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 1,  '72000001', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000002', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000003', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000004', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000005', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000006', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000007', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000008', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000009', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000010', 1, '数学' , 1, '', '', '','', 5);
+
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 1,  '72000011', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000012', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000013', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000014', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000015', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000016', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000017', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000018', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000019', 1, '数学' , 1, '', '', '','', 5),
+ ( 1,  '72000020', 1, '数学' , 1, '', '', '','', 5);
+
+-- 李辰瑶、薛振浩、侍煜佳
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 2,  '32000001', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000002', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000003', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000004', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000005', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000006', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000007', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000008', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000009', 1, '数学' , 2, '', '', '','', 5),
+ ( 2,  '32000010', 1, '数学' , 2, '', '', '','', 5),
+ ( 3,  '32000001', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000002', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000003', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000004', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000005', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000006', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000007', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000008', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000009', 1, '数学' , 3, '', '', '','', 5),
+ ( 3,  '32000010', 1, '数学' , 3, '', '', '','', 5),
+ ( 4,  '32000001', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000002', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000003', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000004', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000005', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000006', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000007', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000008', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000009', 1, '数学' , 4, '', '', '','', 5),
+ ( 4,  '32000010', 1, '数学' , 4, '', '', '','', 5);
+-- 史金贺
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 5,  '42000001', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000002', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000003', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000004', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000005', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000006', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000007', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000008', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000009', 1, '数学' , 5, '', '', '','', 5),
+ ( 5,  '42000010', 1, '数学' , 5, '', '', '','', 5);
+
+-- 赵子熙
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 6,  '52000001', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000002', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000003', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000004', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000005', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000006', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000007', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000008', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000009', 1, '数学' , 6, '', '', '','', 5),
+ ( 6,  '52000010', 1, '数学' , 6, '', '', '','', 5);
+-- 邹硕
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 7,  '52000001', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000002', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000003', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000004', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000005', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000006', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000007', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000008', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000009', 1, '数学' , 7, '', '', '','', 5),
+ ( 7,  '52000010', 1, '数学' , 7, '', '', '','', 5);
+--赵悦心
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 8,  '22000001', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000002', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000003', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000004', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000005', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000006', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000007', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000008', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000009', 1, '数学' , 8, '', '', '','', 5),
+ ( 8,  '22000010', 1, '数学' , 8, '', '', '','', 5);
+----- -- 2022.10.03 非学习班学员>>
+-- 刘佳音  2
+--邓家熠  5
+-- 吴骆骁  2
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 9,  '22000001', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000002', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000003', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000004', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000005', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000006', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000007', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000008', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000009', 1, '数学' , 9, '', '', '','', 5),
+ ( 9,  '22000010', 1, '数学' , 9, '', '', '','', 5),
+ ( 10,  '52000001', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000002', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000003', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000004', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000005', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000006', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000007', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000008', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000009', 1, '数学' , 10, '', '', '','', 5),
+ ( 10,  '52000010', 1, '数学' , 10, '', '', '','', 5),
+ ( 11,  '22000001', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000002', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000003', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000004', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000005', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000006', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000007', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000008', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000009', 1, '数学' , 11, '', '', '','', 5),
+ ( 11,  '22000010', 1, '数学' , 11, '', '', '','', 5);
+
+--贡文博
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 12,  '22000001', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000002', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000003', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000004', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000005', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000006', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000007', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000008', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000009', 1, '数学' , 12, '', '', '','', 5),
+ ( 12,  '22000010', 1, '数学' , 12, '', '', '','', 5);
+--吴皓轩
+INSERT INTO `la_exam_detail` (`examId`, `questionID`,`questionType`,`subjectName`, `userId`,`questionContent`,`options`, `answer`, `infactAnswer`,`score` ) VALUES 
+ ( 13,  '62000001', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000002', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000003', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000004', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000005', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000006', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000007', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000008', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000009', 1, '数学' , 13, '', '', '','', 5),
+ ( 13,  '62000010', 1, '数学' , 13, '', '', '','', 5);
+-- 2、显示考试的题目，并进行答题
+-- 以下数据可用 2022.07.05
+         根据手机号，取得学生所在年级
+select s.* from `la_students` s, `la_users` u where s.stuTel=u.userTel and u.userTel='18800050516'
+       再根据年级，取得试题
+select 
+	ed.examId examId, sq.questionID questionID, ed.questionType questionType, sq.questionContent questionContent, sq.answer answer,ed.infactAnswer infactAnswer, 	ed.score score, sq.optionA optionA, sq.optionB optionB, sq.optionC optionC, sq.optionD optionD
+from la_exam_detail ed left join la_exam e 
+	on ed.examId=e.examId
+left join single_questions sq 
+	on ed.questionID=sq.questionID
+	 AND sq.subjectName='数学' AND sq.grade='7年级'
+where ed.examId=1 order by sq.questionID
+-------- 
+select
+	ed.examId examId, sq.questionID questionID, ed.questionType questionType, sq.questionContent questionContent, sq.answer answer,ed.infactAnswer infactAnswer, case when sq.answer=ed.infactAnswer then '正确' else '错误' end rightOrNot, ed.score score, sq.optionA optionA, sq.optionB optionB, sq.optionC optionC, sq.optionD optionD
+from la_exam_detail ed left join la_exam e 
+	on ed.examId=e.examId
+left join single_questions sq
+	on ed.questionID=sq.questionID
+	 AND sq.subjectName='数学' AND sq.grade='3年级'
+where ed.examId=2 order by sq.questionID
+----------->> 改造以上SQL，将程序写死的参数删除掉
+select sq.grade,ed.examId examId, ls.stuName, sq.questionID questionID, ed.questionType questionType,
+			 sq.testFor,"
+			 sq.questionContent questionContent, sq.answer answer,ed.infactAnswer infactAnswer,
+			 case when sq.answer=ed.infactAnswer then '正确' else '错误' end rightOrNot,
+			 ed.score score, sq.optionA optionA, sq.optionB optionB, sq.optionC optionC, sq.optionD optionD
+			 from la_exam_detail ed left join la_exam e on ed.examId=e.examId
+			 left join single_questions sq on ed.questionID=sq.questionID
+			 AND sq.subjectName="数学" left join la_students ls on ls.stuId = ed.examId 
+			 order by sq.grade, ls.stuName, sq.questionID
+
+
+-- 所有数据中，grade字段用正数替代汉字，即，去掉 年级 2字20220817。
+-- > 以上为显示题目的数据，已经模拟完成。20220705
+-- 6、提交答卷
+-- 以下数据可用 2022.07.05
+-- controller程序：解析前台传来的序号、答案，并按序号排序。
+-- 试题编号需要直接从`la_exam_detail` 表中查询，where条件：学号、考试科目
+select ed.questionID,ed.examId from la_exam_detail ed left join la_exam e 
+on ed.examId=e.examId and e.studentId=1 and e.subjectName='数学' order by ed.questionID
+
+-- 更新考试明细表 `la_exam_detail` ，设置字段 infactAnswer=#实际答案，分值可以不处理(第2版本再处理即可) where条件为试题编号
+          update la_exam_detail set infactAnswer=#infactAnswer where examId=#examId and questionID=#questionID;
+          --update la_exam set infactScore=#infactScore where examId=examId;--此处记录分数，可再第二个版本实现。
+
+-- 7、输出考试报告 -- 仅统计错题的个数即可。暂不展示具体错误的明细
+-- 以下数据可用 2022.07.05
+        select count(*) from la_exam_detail where answer<>infactAnswer and examId=1;
+select count(*) from la_exam_detail where answer<>infactAnswer and examId=#examId;
+ -- 导出考试结果(按人分组) 20220814 以下，（待完善）
+select ed.questionID,ed.userId,ed.subjectName,ed.answer,ed.infactAnswer
+from la_exam_detail ed
+left join la_exam e
+on ed.examId=e.examId
+/****   考试过程 << ***/
